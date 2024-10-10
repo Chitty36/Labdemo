@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Updates and Transitions</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f7f8; /* Background color */
+            margin: 0;
+            padding: 20px;
+        }
+
+        svg {
+            font-size: 12px;
+            margin: 0 auto; /* Center the SVG horizontally */
+            display: block; /* Allows margin: auto to work */
+        }
+
+        .axis path, .axis line, .axis text {
+            display: none;
+        }
+
+        .button {
+            margin: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            background-color: #2c3e50;
+            color: white;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow for depth */
+            text-decoration: none;
+            display: inline-block;
+        }
+    
+        .button:hover {
+            background-color: #1abc9c;
+            transform: translateY(-2px); /* Slight lift effect on hover */
+            box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.2); /* Make shadow deeper on hover */
+        }
+    
+        .button:active {
+            transform: translateY(0); /* Reset lift effect on click */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Return to normal shadow on click */
+        }
+    
+        .button-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            margin-top: 30px;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="padding: 20px; text-align: center;">Updates and Transitions</h2>
+
+<div class="container">
+    <div class="button-container">
+        <a href="index.html" class="button">Homepage</a>
+        <a href="Lab5.1.html" class="button">Lab5.1</a>
+        <button id="updateButton" class="button">Update</button>
+        <button id="transition1Button" class="button">Transition 1</button>
+        <button id="transition2Button" class="button">Transition 2</button>
+    </div>
+    <svg width="500" height="250"></svg>
+</div>
+
+
+<footer>
+    COS30045 Data Visualisation<br>Joe Bloggs
+</footer>
+
+<script>
+    const svgWidth = 500;
+    const svgHeight = 250;
+    const margin = {top: 20, right: 30, bottom: 30, left: 40};
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+    const maxValue = 25;
+
+    let dataset = [24, 10, 29, 19, 8, 15, 20, 12, 9, 6, 21, 28];
+
+    const svg = d3.select("svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight)
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+ 
+    const xScale = d3.scaleBand()
+        .domain(d3.range(dataset.length))
+        .range([0, width])
+        .paddingInner(0.05);
+
+   
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(dataset)])
+        .range([height, 0]);
+
+    
+    svg.selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => xScale(i))
+        .attr("y", d => yScale(d))
+        .attr("width", xScale.bandwidth())
+        .attr("height", d => height - yScale(d))
+        .attr("fill", "slategrey");
+
+    
+    function updateChart() {
+        const numValues = dataset.length;
+        dataset = [];
+        for (let i = 0; i < numValues; i++) {
+            const newNumber = Math.floor(Math.random() * maxValue);
+            dataset.push(newNumber);
+        }
+
+        
+        yScale.domain([0, d3.max(dataset)]);
+
+        
+        svg.selectAll("rect")
+            .data(dataset)
+            .transition()
+            .duration(500) 
+            .attr("y", d => yScale(d))
+            .attr("height", d => height - yScale(d));
+    }
+
+    
+    function transition1() {
+        updateChart();
+        svg.selectAll("rect")
+            .data(dataset)
+            .transition()
+            .duration(2000) 
+            .ease(d3.easeCubicInOut)
+            .attr("y", d => yScale(d))
+            .attr("height", d => height - yScale(d));
+    }
+
+   
+    function transition2() {
+        updateChart();
+        svg.selectAll("rect")
+            .data(dataset)
+            .transition()
+            .delay((d, i) => i * 100) 
+            .duration(500) 
+            .ease(d3.easeCubicInOut)
+            .attr("y", d => yScale(d))
+            .attr("height", d => height - yScale(d));
+    }
+
+    
+    d3.select("#updateButton").on("click", updateChart); 
+    d3.select("#transition1Button").on("click", transition1);
+    d3.select("#transition2Button").on("click", transition2);
+</script>
+
+</body>
+</html>
